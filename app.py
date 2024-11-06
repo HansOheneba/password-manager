@@ -3,15 +3,13 @@ from dotenv import load_dotenv
 import os
 import mysql.connector
 
-# Load environment variables
+
 load_dotenv()
 
-# Load encryption key from environment variable
 key = os.getenv('encryptionKey').encode()
 cipher_suite = Fernet(key)
 
 def get_db_connection():
-    """Establish and return a database connection and cursor."""
     db = mysql.connector.connect(
         host=os.getenv('host'),  
         user=os.getenv('user'),  
@@ -22,7 +20,7 @@ def get_db_connection():
 
 def add_password(service_name, username, password):
     db, cursor = get_db_connection()
-    encrypted_password = cipher_suite.encrypt(password.encode())  # Encrypt password
+    encrypted_password = cipher_suite.encrypt(password.encode()) 
     query = "INSERT INTO passwords (service_name, username, password) VALUES (%s, %s, %s)"
     values = (service_name, username, encrypted_password)
     cursor.execute(query, values)
@@ -39,7 +37,7 @@ def view_passwords():
         service_name = row[1]
         username = row[2]
         encrypted_password = row[3]
-        decrypted_password = cipher_suite.decrypt(encrypted_password).decode()  # Decrypt password
+        decrypted_password = cipher_suite.decrypt(encrypted_password).decode() 
         print(f"Service: {service_name}, Username: {username}, Password: {decrypted_password}")
     cursor.close()
     db.close()
