@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 text-gray-900">
+
+    <div class="container mx-auto py-8">
+        <h1 class="text-2xl font-bold mb-4">Password Manager</h1>
+        <form action="/add" method="POST" class="mb-6">
+            <input type="text" name="service_name" placeholder="Service Name" class="border p-2 mr-2 rounded">
+            <input type="text" name="username" placeholder="Username" class="border p-2 mr-2 rounded">
+            <input type="password" name="password" placeholder="Password" class="border p-2 mr-2 rounded">
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Add</button>
+        </form>
+        <table class="w-full border-collapse bg-white rounded-lg">
+            <thead>
+                <tr>
+                    <th class="border p-3">Service</th>
+                    <th class="border p-3">Username</th>
+                    <th class="border p-3">Password</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for service, username, password in passwords %}
+                <tr>
+                    <td class="border p-3">{{ service }}</td>
+                    <td class="border p-3">{{ username }}</td>
+                    <td class="border p-3">{{ password }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>

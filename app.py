@@ -1,34 +1,59 @@
-from cryptography.fernet import Fernet
+from flask import Flask, render_template, request, redirect, url_for
 from dotenv import load_dotenv
-import os
 import mysql.connector
-
+import os
+from cryptography.fernet import Fernet
 
 load_dotenv()
 
-key = os.getenv('encryptionKey').encode()
-cipher_suite = Fernet(key)
+app = Flask(__name__)
+cipher_suite = Fernet(os.getenv('encryptionKey').encode())
+
 
 def get_db_connection():
-    db = mysql.connector.connect(
-        host=os.getenv('host'),  
-        user=os.getenv('user'),  
-        password=os.getenv('password'), 
+    """Establishes and returns a new database connection."""
+    return mysql.connector.connect(
+        host=os.getenv('host'),
+        user=os.getenv('user'),
+        password=os.getenv('password'),
         database=os.getenv('database')
     )
-    return db, db.cursor()
 
-def add_password(service_name, username, password):
-    db, cursor = get_db_connection()
-    encrypted_password = cipher_suite.encrypt(password.encode()) 
-    query = "INSERT INTO passwords (service_name, username, password) VALUES (%s, %s, %s)"
-    values = (service_name, username, encrypted_password)
-    cursor.execute(query, values)
+
+@app.route('/')
+def index():
+    db = get_db_connection()
+    cursor = db.cursor()
+    cursor.execute("SELECT service_name, username, password FROM passwords")
+    rows = cursor.fetchall()
+    cursor.close()
+    db.close()
+    decrypted_rows = [
+        (service, username, cipher_suite.decrypt(password).decode()) for service, username, password in rows
+    ]
+    return render_template('index.html', passwords=decrypted_rows)
+
+
+@app.route('/add', methods=['POST'])
+def add_password():
+    db = get_db_connection()
+    cursor = db.cursor()
+    service_name = request.form['service_name']
+    username = request.form['username']
+    password = cipher_suite.encrypt(request.form['password'].encode())
+    
+    cursor.execute(
+        "INSERT INTO passwords (service_name, username, password) VALUES (%s, %s, %s)",
+        (service_name, username, password)
+    )
     db.commit()
     cursor.close()
     db.close()
-    print("Password added successfully.")
+    return redirect(url_for('index'))
 
+
+if __name__ == "__main__":
+    app.run(debug=True)
 def view_passwords():
     db, cursor = get_db_connection()
     cursor.execute("SELECT * FROM passwords")
@@ -91,3 +116,4 @@ if __name__ == "__main__":
             print("Invalid option, please try again.")
 
     print("Exiting password manager.")
+
