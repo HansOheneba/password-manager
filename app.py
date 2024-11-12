@@ -86,34 +86,5 @@ def delete_password(service_name):
     db.close()
     print(f"Password for {service_name} deleted.")
 
-if __name__ == "__main__":
-    while True:
-        print("\nPassword Manager")
-        print("1. Add new password")
-        print("2. View passwords")
-        print("3. Update password")
-        print("4. Delete password")
-        print("5. Exit")
-        choice = input("Choose an option: ")
 
-        if choice == '1':
-            service = input("Enter service name: ")
-            username = input("Enter username: ")
-            password = input("Enter password: ")
-            add_password(service, username, password)
-        elif choice == '2':
-            view_passwords()
-        elif choice == '3':
-            service = input("Enter service name to update: ")
-            new_password = input("Enter new password: ")
-            update_password(service, new_password)
-        elif choice == '4':
-            service = input("Enter service name to delete: ")
-            delete_password(service)
-        elif choice == '5':
-            break
-        else:
-            print("Invalid option, please try again.")
-
-    print("Exiting password manager.")
 
